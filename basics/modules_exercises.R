@@ -8,7 +8,7 @@
 # Think of other modifications you could make to improve performance on this given "dataset".
 # (That is, we're not thinking about generalization at this point - but we will in the next section).
 
-
+library(torch)
 
 
 ### generate training data -----------------------------------------------------
