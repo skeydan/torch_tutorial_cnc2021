@@ -1,3 +1,10 @@
+# 1
+# Try modifying the multi-step network to use temperature as an additional predictor (not as an outcome).
+# Does this help with learning?
+
+
+# Solution ---------------------------------------------------------------
+
 library(torch)
 library(tidyverse)
 library(tsibble)
@@ -5,45 +12,42 @@ library(tsibbledata)
 library(lubridate)
 library(fable)
 
-
-# Scope -------------------------------------------------------------------
-
-# Here, we modify the model to forecast not just the very next observation,
-# but two weeks ahead.
-
 # Data --------------------------------------------------------------------
 
 vic_elec
 
 vic_elec_daily <- vic_elec %>%
-  select(Time, Demand) %>%
+  select(Time, Demand, Temperature) %>%
   index_by(Date = date(Time)) %>%
   summarise(
-    Demand = sum(Demand) / 1e3) 
+    Demand = sum(Demand) / 1e3,
+    Temperature = max(Temperature)) 
 
 # Train-valid-test split --------------------------------------------------
 
 elec_train <- vic_elec_daily %>% 
   filter(year(Date) %in% c(2012, 2013)) %>%
   as_tibble() %>%
-  select(Demand) %>%
+  select(Demand, Temperature) %>%
   as.matrix()
 
 elec_valid <- vic_elec_daily %>% 
   filter(year(Date) == 2014) %>%
   as_tibble() %>%
-  select(Demand) %>%
+  select(Demand, Temperature) %>%
   as.matrix()
 
 elec_test <- vic_elec_daily %>% 
   filter(year(Date) %in% c(2014), month(Date) %in% 1:4) %>%
   as_tibble() %>%
-  select(Demand) %>%
+  select(Demand, Temperature) %>%
   as.matrix()
 
-train_mean <- mean(elec_train)
-train_sd <- sd(elec_train)
+train_mean_demand <- colMeans(elec_train)[1]
+train_sd_demand <- sd(elec_train[ , 1])
 
+train_mean_temp <- colMeans(elec_train)[2]
+train_sd_temp <- sd(elec_train[ , 2])
 
 # Create torch dataset ----------------------------------------------------
 
@@ -54,7 +58,10 @@ elec_dataset <- dataset(
     
     self$n_timesteps <- n_timesteps
     self$n_forecast <- n_forecast
-    self$x <- torch_tensor((x - train_mean) / train_sd)
+    
+    demand <- (x[ , 1] - train_mean_demand) / train_sd_demand
+    temp <- (x[ , 2] - train_mean_temp) / train_sd_temp
+    self$x <- torch_tensor(cbind(demand, temp))
 
   },
   
@@ -65,14 +72,14 @@ elec_dataset <- dataset(
     pred_length <- self$n_forecast
     
     list(
-      x = self$x[start:end],
-      y = self$x[(end + 1):(end + pred_length)]$squeeze(2)
+      x = self$x[start:end, ],
+      y = self$x[(end + 1):(end + pred_length), 1]
     )
     
   },
   
   .length = function() {
-    length(self$x) - self$n_timesteps - self$n_forecast + 1
+    nrow(self$x) - self$n_timesteps - self$n_forecast + 1
   }
 )
 
@@ -136,7 +143,7 @@ model <- nn_module(
   
 )
 
-net <- model(input_size = 1, hidden_size = 64, linear_size = 128,
+net <- model(input_size = 2, hidden_size = 64, linear_size = 128,
              output_size = n_forecast, dropout = 0.5)
 net(b$x)
 
@@ -213,7 +220,8 @@ coro::loop(for (b in test_dl) {
 })
 
 vic_elec_test <- vic_elec_daily %>% 
-  filter(year(Date) %in% c(2014), month(Date) %in% 1:4) 
+  filter(year(Date) %in% c(2014), month(Date) %in% 1:4) %>%
+  select(Demand)
 
 test_pred1 <- test_preds[[1]]
 test_pred1 <- c(rep(NA, n_timesteps), test_pred1, rep(NA, nrow(vic_elec_test) - n_timesteps - n_forecast))
@@ -233,11 +241,11 @@ test_pred5 <- c(rep(NA, n_timesteps + 80), test_pred5, rep(NA, nrow(vic_elec_tes
 
 preds_ts <- vic_elec_test %>% 
   add_column(
-    ex_1 = test_pred1 * train_sd + train_mean,
-    ex_2 = test_pred2 * train_sd + train_mean,
-    ex_3 = test_pred3 * train_sd + train_mean,
-    ex_4 = test_pred4 * train_sd + train_mean,
-    ex_5 = test_pred5 * train_sd + train_mean) %>%
+    ex_1 = test_pred1 * train_sd_demand + train_mean_demand,
+    ex_2 = test_pred2 * train_sd_demand + train_mean_demand,
+    ex_3 = test_pred3 * train_sd_demand + train_mean_demand,
+    ex_4 = test_pred4 * train_sd_demand + train_mean_demand,
+    ex_5 = test_pred5 * train_sd_demand + train_mean_demand) %>%
   pivot_longer(-Date) %>%
   update_tsibble(key = name)
 
@@ -246,7 +254,6 @@ preds_ts %>%
   autoplot() +
   scale_color_hue(h = c(80, 300), l = 70) +
   theme_minimal()
-
 
 
 
