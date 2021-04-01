@@ -16,9 +16,21 @@
 #### torch basics
 
     basics/tensors.R
+
     basics/tensors_exercises.R
     basics/tensors_exercises_solutions.R
 
 #### time series forecasting
 
+    time_series_forecasting/rnn_intro.R
+    time_series_forecasting/rnn_multistep.R
+
+    time_series_forecasting/rnn_exercises.R
+    time_series_forecasting/rnn_exercises_solutions_1.R
+    time_series_forecasting/rnn_exercises_solutions_2.R
+
 #### optimization
+
+    optimization/minimize.R
+    optimization/logistic_regression.R
+    optimization/constrained.R
