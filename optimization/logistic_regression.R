@@ -38,6 +38,7 @@ lbfgs.out$value
 
 t_X1 <- torch_tensor(X1, device = "cuda")
 t_y <- torch_tensor(y, device = "cuda")
+
 t_likelihood <- function(params, X, y, prec) {
   Xbeta <- X$matmul(params)
   -(torch_sum(y * Xbeta - torch_log(1 + torch_exp(Xbeta))) - 0.5 * torch_sum(torch_square(params) * prec))

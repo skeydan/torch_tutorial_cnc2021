@@ -31,6 +31,23 @@ ggplot(data = df,
 
 fn <- rosenbrock
 
+
+# optim -------------------------------------------------------------------
+
+rosenbrock_gradient <- function(x) { 
+  x1 <- x[1]
+  x2 <- x[2]
+  c(-400 * x1 * (x2 - x1^2) - 2 * (1 - x1),
+    200 * (x2 - x1^2))
+}
+
+optim(c(-1, 1), fn) # Nelder-Mead
+
+optim(c(-1, 1), fn, rosenbrock_gradient, method = "BFGS")
+
+optim(c(-1, 1), fn, rosenbrock_gradient, method = "CG")
+
+
 # Manual ------------------------------------------------------------------
 
 num_iterations <- 1000
@@ -111,22 +128,6 @@ for (i in 1:num_iterations) {
 }
 
 params
-
-
-# optim -------------------------------------------------------------------
-
-rosenbrock_gradient <- function(x) { 
-  x1 <- x[1]
-  x2 <- x[2]
-  c(-400 * x1 * (x2 - x1^2) - 2 * (1 - x1),
-    200 * (x2 - x1^2))
-}
-
-optim(c(-1, 1), fn) # Nelder-Mead
-
-optim(c(-1, 1), fn, rosenbrock_gradient, method = "BFGS")
-
-optim(c(-1, 1), fn, rosenbrock_gradient, method = "CG")
 
 
 
