@@ -122,8 +122,8 @@ net <- nn_module(
 
 model <- net()
 
-#device <- torch_device(if (cuda_is_available()) "cuda" else "cpu")
-device <- "cpu"
+device <- torch_device(if (cuda_is_available()) "cuda" else "cpu")
+#device <- "cpu"
 model <- model$to(device = device)
 
 

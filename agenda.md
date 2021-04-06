@@ -41,4 +41,3 @@
 
     optimization/minimize.R
     optimization/logistic_regression.R
-    optimization/constrained.R
