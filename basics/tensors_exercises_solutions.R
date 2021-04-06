@@ -32,7 +32,7 @@ t2 <- 1:8 %>% torch_tensor()
 t1$matmul(t2)$square()$sum()$to(dtype = torch_float())$sqrt()
 
 # broadcasting takes care of duplication for us 
-# also, no transposition needed
+# also, no transposition needed (no concept of row vector vs column vector)
 t1 * t2
 
 # dimension 1 (not 2) collapses the rows, giving us one value per "feature"

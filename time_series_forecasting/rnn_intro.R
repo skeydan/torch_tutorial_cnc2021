@@ -4,7 +4,6 @@ library(tsibble)
 library(tsibbledata)
 library(lubridate)
 library(feasts)
-library(fable)
 
 
 # Scope -------------------------------------------------------------------

@@ -31,10 +31,10 @@ loss <- l(x)$sum() # assume we wanted to minimize sum of outputs
 l$weight$grad
 l$bias$grad
 
-out$grad_fn
+loss$grad_fn
 
 # compute gradients
-out$backward()
+loss$backward()
 l$weight$grad
 l$bias$grad
 

@@ -19,7 +19,10 @@ b$grad_fn
 
 a$grad
 
-##
+
+
+# Intermediate gradients --------------------------------------------------
+
 a <- torch_tensor(matrix(1:4, ncol = 2, byrow = TRUE), dtype = torch_float(), requires_grad = TRUE)
 b <- a$mul(2)
 b$retain_grad()
@@ -29,6 +32,10 @@ c$backward()
 
 b$grad # how does c change as b changes?
 a$grad # how does b change as a changes?
+
+
+
+# No-grad operations ------------------------------------------------------
 
 # say we want to update a (for example, in optimization)
 # we need to exempt that operation from "recording"

@@ -12,7 +12,7 @@ library(torch)
 # function to minimize
 f <- function(x) x^2 - 7
 
-# we start from x = 7
+# we start from x = 11
 param <- torch_tensor(11, requires_grad = TRUE)
 
 # learning rate: fraction of gradient to subtract

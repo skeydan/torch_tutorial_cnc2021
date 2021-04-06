@@ -66,7 +66,7 @@ test_dl <- dataloader(test_ds, batch_size = 8)
 
 batch <- dataloader_make_iter(train_dl) %>% dataloader_next()
 
-par(mfrow = c(8,8), mar = rep(0, 4))
+par(mfrow = c(2,4), mar = rep(0, 4))
 
 images <- as.array(batch$x$squeeze(2))
 
@@ -122,16 +122,14 @@ net <- nn_module(
 
 model <- net()
 
-device <- torch_device(if (cuda_is_available()) "cuda" else "cpu")
-
+#device <- torch_device(if (cuda_is_available()) "cuda" else "cpu")
+device <- "cpu"
 model <- model$to(device = device)
 
 
 # Training ----------------------------------------------------------------
 # For training, we need to decide on an adequate loss function, as well as 
 # the optimization algorithm to use.
-
-loss <- nnf_mse_loss(output, b$y$unsqueeze(2))
 
 optimizer <- optim_adam(model$parameters)
 
